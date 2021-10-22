@@ -95,3 +95,19 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+//** system call trace **//
+uint64
+sys_strace(void)
+{
+  int n;
+
+  if(argint(0, &n) < 0)       //setting mask arg given by user to n
+  {
+    return -1;
+  }
+  struct proc *p = myproc();
+  p->tracemask = n;    //setting tracemask of the process to n 
+  //p->numOfArgs = argc;
+  return 0;
+}
