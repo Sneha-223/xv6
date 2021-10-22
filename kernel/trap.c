@@ -164,6 +164,24 @@ clockintr()
 {
   acquire(&tickslock);
   ticks++;
+
+  // //  updating run time of the process (Q2) //
+
+  // //get current process
+  // struct proc * current_process = myproc();
+  
+  // //check if process is valid
+  // if(current_process)
+  // {
+  //   //check if process is running
+  //   if(current_process->state == RUNNING)
+  //   {
+  //     current_process->rtime++;
+  //   }
+  // }
+
+  update_time();
+
   wakeup(&ticks);
   release(&tickslock);
 }

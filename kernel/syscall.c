@@ -102,6 +102,7 @@ extern uint64 sys_sbrk(void);
 extern uint64 sys_sleep(void);
 extern uint64 sys_unlink(void);
 extern uint64 sys_wait(void);
+extern uint64 sys_waitx(void);       // (Q2)
 extern uint64 sys_write(void);
 extern uint64 sys_uptime(void);
 extern uint64 sys_strace(void);      // **
@@ -129,6 +130,7 @@ static uint64 (*syscalls[])(void) = {
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
 [SYS_strace]  sys_strace,      //**
+[SYS_waitx]   sys_waitx,       // (Q2)
 };
 
 
@@ -138,7 +140,7 @@ static char *syscall_names[] = {
   "read", "write", "close", "kill", 
   "exec", "open", "mknod", "unlink", "fstat", 
   "link", "mkdir", "chdir", "dup", "getpid", 
-  "sbrk", "sleep", "uptime", "strace",
+  "sbrk", "sleep", "uptime", "strace", "waitx",
 };
 
 void

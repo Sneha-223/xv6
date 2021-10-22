@@ -107,4 +107,7 @@ struct proc {
   char name[16];               // Process name (debugging)
   int tracemask;               // Trace Mask to store the mask passed by the user **
   //int numOfArgs;               // Number of arguments in the syscall **
+  int ctime;                   // Create time of the process (Q2)
+  int rtime;                   // Run time of the process (Q2)
+  int etime;                   // End time of the process (Q2)
 };
