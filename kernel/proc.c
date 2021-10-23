@@ -502,6 +502,7 @@ update_time()
   }
 }
 
+
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
 // Scheduler never returns.  It loops, doing:
@@ -509,35 +510,110 @@ update_time()
 //  - swtch to start running that process.
 //  - eventually that process transfers control
 //    via swtch back to the scheduler.
+// void
+// scheduler(void)
+// {
+//   struct proc *p;
+//   //struct proc *p1;
+//   struct cpu *c = mycpu();
+//   //struct proc *minP;
+//   c->proc = 0;
+
+//   for(;;)
+//   {
+//     // Avoid deadlock by ensuring that devices can interrupt.
+//     intr_on();
+
+//     for(p = proc; p < &proc[NPROC]; p++) {
+//       acquire(&p->lock);
+//       if(p->state == RUNNABLE) {
+//         // Switch to chosen process.  It is the process's job
+//         // to release its lock and then reacquire it
+//         // before jumping back to us.
+//         p->state = RUNNING;
+//         c->proc = p;
+//         printf("pname %s, pid %d, rtime %d ctime %d\n", p->name, p->pid, p->rtime, p->ctime);
+//         swtch(&c->context, &p->context);
+
+//         // Process is done running for now.
+//         // It should have changed its p->state before coming back.
+//         c->proc = 0;
+//       }
+//       release(&p->lock);
+//     }
+//   }
+// }
+
+
+//FCFS
 void
 scheduler(void)
 {
-  struct proc *p;
+  struct proc *p = 0;
   struct cpu *c = mycpu();
-  
   c->proc = 0;
-  for(;;){
+  int sched_condition = 0;
+
+  for(;;)
+  {
     // Avoid deadlock by ensuring that devices can interrupt.
     intr_on();
-
-    for(p = proc; p < &proc[NPROC]; p++) {
+    struct proc *scheduled_process = 0;
+    
+    // Loop over process table looking for process to run.
+    //acquire(&ptable.lock);
+    for(p = proc; p < &proc[NPROC]; p++)
+    {
       acquire(&p->lock);
-      if(p->state == RUNNABLE) {
-        // Switch to chosen process.  It is the process's job
-        // to release its lock and then reacquire it
-        // before jumping back to us.
-        p->state = RUNNING;
-        c->proc = p;
-        swtch(&c->context, &p->context);
 
-        // Process is done running for now.
-        // It should have changed its p->state before coming back.
-        c->proc = 0;
+      if(p->state == RUNNABLE)
+      {
+        if(scheduled_process == 0)
+        {
+          scheduled_process = p;
+        }
+        else
+        {
+          sched_condition = p->ctime < scheduled_process->ctime;
+
+          if(sched_condition)
+          {
+            release(&scheduled_process->lock);
+            scheduled_process = p;
+          }
+          else
+          {
+            release(&p->lock);
+          }
+        }
       }
-      release(&p->lock);
+      else
+      {
+        release(&p->lock);
+      }
     }
+      
+    // ignore init and sh processes from FCFS
+    if(scheduled_process != 0)
+    {
+      scheduled_process->state = RUNNING;
+      c->proc = scheduled_process;
+      // acquire(&tickslock);
+      // scheduled_process->srt_time = ticks; // task 4.2 - get running time for burst time computation
+      // release(&tickslock);
+      //printf("pname %s, pid %d, rtime %d ctime %d\n", scheduled_process->name, scheduled_process->pid, scheduled_process->rtime, scheduled_process->ctime);
+      swtch(&c->context, &scheduled_process->context);
+
+      // Process is done running for now.
+      // It should have changed its p->state before coming back.
+      c->proc = 0;
+      release(&scheduled_process->lock);
+  
+    }
+    
   }
 }
+
 
 // Switch to scheduler.  Must hold only p->lock
 // and have changed proc->state. Saves and restores
@@ -725,7 +801,7 @@ procdump(void)
       state = states[p->state];
     else
       state = "???";
-    printf("%d %s %s", p->pid, state, p->name);
+    printf("%d %s %s %d", p->pid, state, p->name, p->ctime);      // (Q2)
     printf("\n");
   }
 }
