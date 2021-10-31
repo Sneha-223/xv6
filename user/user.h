@@ -25,6 +25,7 @@ int sleep(int);
 int uptime(void);
 int strace(int);
 int waitx(int*, int* /*wtime*/, int* /*rtime*/);    // (Q2)
+int setpriority(int /*priority*/, int /*pid*/);    // (Q2 - PBS)
 
 // ulib.c
 int stat(const char*, struct stat*);

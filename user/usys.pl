@@ -38,3 +38,4 @@ entry("sleep");
 entry("uptime");
 entry("strace");        #**
 entry("waitx");         # (Q2)
+entry("setpriority");         # (Q2  PBS)

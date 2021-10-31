@@ -145,11 +145,19 @@ int
 main(void)
 {
   printf("Selected scheduling policy: ");
-  #ifdef DEFAULT
-    printf("Default\n");
+  #ifdef RR
+    printf("RR\n");
   #else
   #ifdef FCFS
     printf("FCFS\n");
+  #else
+  #ifdef PBS
+    printf("PBS\n");
+  // #else
+  // #ifdef MLFQ
+  //   printf("MLFQ\n");
+  // #endif
+  #endif
   #endif
   #endif
 

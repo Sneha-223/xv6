@@ -22,3 +22,4 @@
 #define SYS_close  21
 #define SYS_strace 22       //**
 #define SYS_waitx  23       // (Q2)
+#define SYS_setpriority  24       // (Q2 - PBS)

@@ -109,6 +109,24 @@ int             either_copyin(void *dst, int user_src, uint64 src, uint64 len);
 void            procdump(void);
 int             waitx(uint64, uint*, uint*);
 void            update_time(void);
+int             setpriority(int, int);
+
+// #ifdef MLFQ
+// struct queue 
+// {
+//   int start;                 // start index
+//   int end;                   // end index
+//   struct proc *que[63];     // array of `struct proc` pointers
+// };
+
+// struct queue mlfq[5];
+
+// void pushback(struct queue *, struct proc *);          // pushing process to the end of the queue
+// void deletefront(struct queue *);                      // deleting process 
+// void deleteIdx(struct queue *, int);                   // deleting process with given index in the queue (for ageing)
+// int size(struct queue *);                              // size of the Queue
+// void ageproc(void);                             // ageing the processes 
+// #endif
 
 // swtch.S
 void            swtch(struct context*, struct context*);

@@ -106,6 +106,7 @@ extern uint64 sys_waitx(void);       // (Q2)
 extern uint64 sys_write(void);
 extern uint64 sys_uptime(void);
 extern uint64 sys_strace(void);      // **
+extern uint64 sys_setpriority(void);      // (Q2 - PBS)
 
 static uint64 (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -131,6 +132,7 @@ static uint64 (*syscalls[])(void) = {
 [SYS_close]   sys_close,
 [SYS_strace]  sys_strace,      //**
 [SYS_waitx]   sys_waitx,       // (Q2)
+[SYS_setpriority]   sys_setpriority,       // (Q2 - PBS)
 };
 
 
@@ -140,52 +142,50 @@ static char *syscall_names[] = {
   "read", "write", "close", "kill", 
   "exec", "open", "mknod", "unlink", "fstat", 
   "link", "mkdir", "chdir", "dup", "getpid", 
-  "sbrk", "sleep", "uptime", "strace", "waitx",
+  "sbrk", "sleep", "uptime", "strace", "waitx", "setpriority",
+};
+
+
+//** making array of num of syscall args **//
+static int syscall_arg_count[] = {
+  0, 0, 1, 1, 1, 
+  3, 3, 1, 1, 
+  2, 2, 3, 1, 2, 
+  2, 1, 1, 1, 0, 
+  1, 1, 0, 1, 3, 2,
 };
 
 void
 syscall(void)
 {
-  int num;
+  int num, arg;
   struct proc *p = myproc();
 
   num = p->trapframe->a7;
-  if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
+  arg = p->trapframe->a0;
+  if(num > 0 && num < NELEM(syscalls) && syscalls[num]) 
+  {
     p->trapframe->a0 = syscalls[num]();
 
     //** modifying syscall to print the strace **//
-    if ((p->tracemask >> num) & 1) {
-      int arg0;
-      argint(0, &arg0);
-      int arg1;
-      argint(1, &arg1);
-      int arg2;
-      argint(2, &arg2);
+    if ((p->tracemask >> num) & 1) 
+    {
+      printf("%d: syscall %s (%d", p->pid, syscall_names[num], arg);
 
-      // int n;
-      // int i = 0;
-      // while(argint(i, &n) >= 0)
-      // {
-      //   printf("%d ", n);
-      //   i++;
-        
-      //   if(i > 5)
-      //   {
-      //     break;
-      //   }
-      // }
-      // printf("\n"); 
+      for(int i = 1; i < syscall_arg_count[num]; i++)
+      {
+        int n;
+        argint(i, &n);
+        printf(" %d", n);
+      }
 
-	    printf("%d: syscall %s (%d %d %d) -> %d\n", p->pid, syscall_names[num], arg0, arg1, arg2, p->trapframe->a0);
+	    printf(") -> %d\n", p->trapframe->a0);
     }
-  } else {
+  } 
+  else 
+  {
     printf("%d %s: unknown sys call %d\n", p->pid, p->name, num);
     p->trapframe->a0 = -1;
   }
 
-  // //** modifying syscall to print the strace **//
-  // if (p->tracemask >> num) {
-	//   printf("%d: syscall %s -> %d\n", 
-	// 		  p->pid, syscall_names[num], p->trapframe->a0);
-  // }
 }

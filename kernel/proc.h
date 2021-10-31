@@ -80,6 +80,26 @@ struct trapframe {
   /* 280 */ uint64 t6;
 };
 
+
+//#ifdef MLFQ
+
+// struct queue 
+// {
+//   int start;                 // start index
+//   int end;                   // end index
+//   struct proc *que[NPROC];     // array of `struct proc` pointers
+// };
+
+// struct queue mlfq[5];
+
+// void pushback(queue *, struct proc *);          // pushing process to the end of the queue
+// void deletefront(queue *);                      // deleting process 
+// void deleteIndx(queue *, int);                   // deleting process with given index in the queue (for ageing)
+// int size(queue *);                              // size of the Queue
+// void ageproc(void);                             // ageing the processes 
+
+//#endif
+
 enum procstate { UNUSED, USED, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 
 // Per-process state
@@ -106,8 +126,15 @@ struct proc {
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
   int tracemask;               // Trace Mask to store the mask passed by the user **
-  //int numOfArgs;               // Number of arguments in the syscall **
   int ctime;                   // Create time of the process (Q2)
   int rtime;                   // Run time of the process (Q2)
   int etime;                   // End time of the process (Q2)
+  int priority;                // Process priority for PBS
+  int stime;                   // Sleeping time of the process 
+  int dynamic_priority;
+  int niceness;
+  //int queue;                   // queue the process is in
+  //int sched_time;              // scheduled time (MLFQ)
+  int num_of_runs;             // number of times a process ran (MLFQ)
+  //int ticks[5];         // Number of ticks the process receives at the `i`th queue
 };

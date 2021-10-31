@@ -108,7 +108,7 @@ sys_strace(void)
   }
   struct proc *p = myproc();
   p->tracemask = n;    //setting tracemask of the process to n 
-  //p->numOfArgs = argc;
+  
   return 0;
 }
 
@@ -131,4 +131,18 @@ sys_waitx(void)
   if (copyout(p->pagetable, addr2,(char*)&rtime, sizeof(int)) < 0)
     return -1;
   return ret;
+}
+
+// (Q2 - PBS)
+uint64
+sys_setpriority(void)
+{
+  int pid;
+  int priority;
+  if(argint(0, &priority) < 0) 
+    return -1;
+  if(argint(1, &pid) < 0)
+    return -1;
+
+  return setpriority(priority, pid);
 }

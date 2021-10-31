@@ -78,7 +78,11 @@ usertrap(void)
 
   // give up the CPU if this is a timer interrupt.
   if(which_dev == 2)
+  {
+    #ifdef RR
     yield();
+    #endif
+  }
 
   usertrapret();
 }
@@ -151,7 +155,36 @@ kerneltrap()
 
   // give up the CPU if this is a timer interrupt.
   if(which_dev == 2 && myproc() != 0 && myproc()->state == RUNNING)
-    yield();
+  {
+
+    //#if !defined(FCFS) || !defined(PBS)
+    #ifdef RR
+      yield();
+    #endif
+
+
+  // #ifdef MLFQ
+  //   // Check the waiting times and push the respective processes down the queue
+  //   struct proc * p = myproc();
+  //   if(which_dev == 2 && myproc() != 0 && myproc()->state == RUNNING) 
+  //   {
+  //       p->ticks[p->queue]++;
+
+  //       if(ticks - p->sched_time >= (1 << p->queue)) 
+  //       {
+  //         yield();
+  //         int newQ = p->queue + 1;
+  //         if (p->queue >= NPROC)
+  //             newQ = NPROC - 1;
+  //         struct proc * del = mlfq[p->queue].que[mlfq[p->queue].start];
+  //         deletefront(&mlfq[p->queue]);
+  //         del->queue = newQ;
+  //         del->sched_time = ticks;
+  //         pushback(&mlfq[newQ], del);
+  //       }
+  //   }
+  // #endif
+  }
 
   // the yield() may have caused some traps to occur,
   // so restore trap registers for use by kernelvec.S's sepc instruction.
@@ -181,6 +214,10 @@ clockintr()
   // }
 
   update_time();
+
+  // #ifdef MLFQ
+  //   ageproc();
+  // #endif
 
   wakeup(&ticks);
   release(&tickslock);
